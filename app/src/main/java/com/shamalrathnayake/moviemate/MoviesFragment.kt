@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,37 +36,14 @@ class MoviesFragment : Fragment() {
 
 
 
-    private val categories = listOf(
-        "Now Playing" to "now_playing",
-        "Popular" to "popular",
-        "Top Rated" to "top_rated",
-        "Upcoming" to "upcoming",
-        "Action" to "28",
-        "Adventure" to "12",
-        "Animation" to "16",
-        "Comedy" to "35",
-        "Crime" to "80",
-        "Documentary" to "99",
-        "Drama" to "18",
-        "Family" to "10751",
-        "Fantasy" to "14",
-        "History" to "36",
-        "Horror" to "27",
-        "Music" to "10402",
-        "Mystery" to "9648",
-        "Romance" to "10749",
-        "Science Fiction" to "878",
-        "TV Movie" to "10770",
-        "Thriller" to "53",
-        "War" to "10752",
-        "Western" to "37"
-    )
+
 
 
 
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentMoviesBinding.inflate(inflater, container, false)
@@ -110,7 +88,25 @@ class MoviesFragment : Fragment() {
         moviesRecyclerView = view.findViewById(R.id.movieRecyclerView)
         categoryChipsRecyclerView = view.findViewById(R.id.categoryChipsRecyclerView)
 
-        movieAdapter = MovieAdapter()
+        movieAdapter = MovieAdapter{ movie ->
+            System.out.println("------------------------------")
+            System.out.println(movie)
+
+            val action = MoviesFragmentDirections.actionMoviesFragmentToMovieDetailFragment(movie)
+
+            System.out.println("------------------------------")
+            System.out.println(action)
+
+            val navController = findNavController()
+
+            System.out.println("------------------------------")
+            System.out.println(navController)
+
+            navController.navigate(action)
+
+        }
+
+
         moviesRecyclerView.apply {
             val displayMetrics = Resources.getSystem().displayMetrics
             val screenWidthPx = displayMetrics.widthPixels
@@ -141,6 +137,7 @@ class MoviesFragment : Fragment() {
             moviesRecyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacing, true))
         }
 
+        val categories = movieAdapter.getCategories()
         categoryAdapter = CategoryChipsAdapter(categories) { category ->
             viewModel.loadMovies(category, true)
         }
@@ -149,6 +146,9 @@ class MoviesFragment : Fragment() {
             adapter = categoryAdapter
         }
     }
+
+
+
     private fun setupObservers() {
         viewModel.movies.observe(viewLifecycleOwner) { movies ->
             movieAdapter.submitList(movies)
