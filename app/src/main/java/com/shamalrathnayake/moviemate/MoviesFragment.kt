@@ -1,12 +1,17 @@
 package com.shamalrathnayake.moviemate
 
+import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -79,6 +84,26 @@ class MoviesFragment : Fragment() {
         setupObservers()
 
         viewModel.loadMovies("now_playing")
+
+        binding.search.setOnEditorActionListener  { text, actionId, event  ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+
+                val query = text.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    viewModel.searchMovies(query)
+                } else {
+                    viewModel.loadMovies("now_playing", true)
+                }
+
+                val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(text.windowToken, 0)
+
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun setupRecyclerViews(view: View) {
@@ -129,8 +154,16 @@ class MoviesFragment : Fragment() {
             movieAdapter.submitList(movies)
         }
 
+        viewModel.searchResults.observe(viewLifecycleOwner) { movies ->
+            movieAdapter.submitList(movies)
+        }
+
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Handle loading state if needed
+            if(isLoading){
+                binding.progressBar.visibility = View.VISIBLE
+            }else{
+                binding.progressBar.visibility = View.GONE
+            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -138,6 +171,8 @@ class MoviesFragment : Fragment() {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
         }
+
+
     }
 
 }

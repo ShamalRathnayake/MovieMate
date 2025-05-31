@@ -16,6 +16,9 @@ class MoviesViewModel @Inject constructor(private val apiService: ApiService) : 
     private val _movies = MutableLiveData<List<Movie>>()
     val movies: LiveData<List<Movie>> = _movies
 
+    private val _searchResults = MutableLiveData<List<Movie>>()
+    val searchResults: LiveData<List<Movie>> = _searchResults
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -26,6 +29,7 @@ class MoviesViewModel @Inject constructor(private val apiService: ApiService) : 
     private var isLastPage = false
     private var isLoadingMore = false
     private var currentCategory = "now_playing"
+    private var currentQuery: String? = null
 
 
     fun loadMovies(category: String, isRefresh: Boolean = false) {
@@ -57,6 +61,46 @@ class MoviesViewModel @Inject constructor(private val apiService: ApiService) : 
                 val currentList = _movies.value?.toMutableList() ?: mutableListOf()
                 currentList.addAll(newMovies)
                 _movies.value = currentList
+
+                currentPage++
+            } catch (e: Exception) {
+                _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
+                isLoadingMore = false
+            }
+        }
+    }
+
+
+    fun searchMovies(searchText: String) {
+
+
+
+        if (currentQuery != searchText) {
+            currentPage = 1
+            isLastPage = false
+            _searchResults.value = emptyList()
+            currentQuery = searchText
+        }
+
+        if (isLastPage || isLoadingMore) return
+
+
+        isLoadingMore = true
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val response =  apiService.searchMovies(query = searchText, page = currentPage)
+
+
+                val newMovies = response.results
+                isLastPage = currentPage >= response.totalPages
+
+                val currentList = _searchResults.value?.toMutableList() ?: mutableListOf()
+                currentList.addAll(newMovies)
+                _searchResults.value = currentList
 
                 currentPage++
             } catch (e: Exception) {
