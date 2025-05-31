@@ -13,18 +13,41 @@
         <action
             android:id="@+id/action_moviesFragment_to_movieDetailFragment"
             app:destination="@id/movieDetailFragment" />
-
     </fragment>
+
+    <fragment
+        android:id="@+id/tvShowsFragment"
+        android:name="com.shamalrathnayake.moviemate.TvShowsFragment"
+        android:label="fragment_tv_shows"
+        tools:layout="@layout/fragment_tv_shows">
+        <action
+            android:id="@+id/action_tvShowsFragment_to_tvShowDetailFragment"
+            app:destination="@id/tvShowDetailFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/movieDetailFragment"
         android:name="com.shamalrathnayake.moviemate.MovieDetailFragment"
         android:label="fragment_movie_detail"
-        tools:layout="@layout/fragment_movie_detail" >
+        tools:layout="@layout/fragment_movie_detail">
         <argument
             android:name="movie"
             app:argType="com.shamalrathnayake.moviemate.api.models.Movie" />
         <action
             android:id="@+id/action_movieDetailFragment_to_moviesFragment"
             app:destination="@id/moviesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tvShowDetailFragment"
+        android:name="com.shamalrathnayake.moviemate.TvShowDetailFragment"
+        android:label="fragment_tv_show_detail"
+        tools:layout="@layout/fragment_tv_show_detail">
+        <argument
+            android:name="tvShow"
+            app:argType="com.shamalrathnayake.moviemate.api.models.TvShow" />
+        <action
+            android:id="@+id/action_tvShowDetailFragment_to_tvShowsFragment"
+            app:destination="@id/tvShowsFragment" />
     </fragment>
 </navigation>
